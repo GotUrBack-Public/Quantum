@@ -6,7 +6,6 @@ import {
   IconSun, IconUser, IconUserPlus, IconUsers, IconUsersGroup, IconVideo, IconWorld,
   IconX,
 } from "@tabler/icons-react";
-import type { TablerIcon } from "@tabler/icons-react";
 
 export type IconName =
   | "messages" | "compass" | "users" | "user" | "settings" | "life-buoy"
@@ -16,7 +15,7 @@ export type IconName =
   | "send" | "photo" | "phone" | "video" | "bell" | "filter" | "users-group"
   | "key" | "message-circle";
 
-const icons: Record<IconName, TablerIcon> = {
+const icons: Record<IconName, typeof IconUser> = {
   messages: IconMessages, compass: IconCompass, users: IconUsers, user: IconUser,
   settings: IconSettings, "life-buoy": IconLifebuoy, menu: IconMenu2, sun: IconSun,
   moon: IconMoon, plus: IconPlus, search: IconSearch, dots: IconDots,
