@@ -84,6 +84,14 @@ function translatePage(language: "de" | "en") {
 }
 
 
+
+type AdSlotProps = { imageSrc?: string; videoSrc?: string; imageAlt?: string };
+function AdSlot({ imageSrc, videoSrc, imageAlt = "Advertisement" }: AdSlotProps) {
+  if (videoSrc) return <div className="ad-slot ad-slot-media"><video src={videoSrc} autoPlay muted loop playsInline aria-label={imageAlt}/></div>;
+  if (imageSrc) return <div className="ad-slot ad-slot-media"><img src={imageSrc} alt={imageAlt}/></div>;
+  return <AdSlot />;
+}
+
 export function AppShell() {
   const prefersReducedMotion = useReducedMotion();
   const [view,setView]=useState<View>("chats");
