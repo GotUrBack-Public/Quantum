@@ -2,6 +2,37 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
+type GraphemeSegmenter = {
+  segment(input: string): Iterable<{ segment: string }>;
+};
+
+const graphemeSegmenter = typeof Intl !== "undefined" && "Segmenter" in Intl
+  ? new (Intl as unknown as { Segmenter: new (locales?: string | string[], options?: { granularity: "grapheme" }) => GraphemeSegmenter }).Segmenter("de", { granularity: "grapheme" })
+  : null;
+
+// Keep valid Unicode (including emoji ZWJ sequences), but discard malformed
+// surrogate code points, invisible spoofing controls and non-printing controls.
+function safeUserText(input: string, maxGraphemes: number): string {
+  const normalized = input.normalize("NFC");
+  const safe = Array.from(normalized).filter((character) => {
+    const point = character.codePointAt(0) ?? 0;
+    if (point >= 0xd800 && point <= 0xdfff) return false;
+    if (point <= 0x1f || (point >= 0x7f && point <= 0x9f)) return false;
+    if (point === 0x00ad || point === 0x034f || point === 0x061c ||
+        point === 0x200b || point === 0x200e || point === 0x200f ||
+        point === 0x202a || (point >= 0x202b && point <= 0x202e) ||
+        point === 0x2060 || (point >= 0x2066 && point <= 0x2069) ||
+        point === 0xfeff) return false;
+    if ((point >= 0xfdd0 && point <= 0xfdef) || (point & 0xffff) >= 0xfffe) return false;
+    return true;
+  }).join("");
+
+  const clusters = graphemeSegmenter
+    ? Array.from(graphemeSegmenter.segment(safe), (part) => part.segment)
+    : Array.from(safe);
+  return clusters.slice(0, maxGraphemes).join("");
+}
+
 type Message = { id: string; author: "you" | "them"; text: string; time: string };
 type Chat = { id: string; name: string; initials: string; preview: string; time: string; kind: "direct" | "public" | "private" | "p2p"; online?: boolean; unread?: number; messages: Message[] };
 
@@ -42,7 +73,7 @@ export function AppShell() {
   const filtered=useMemo(()=>chats.filter(c=>c.name.toLowerCase().includes(search.toLowerCase())),[chats,search]);
 
   function send(event:FormEvent<HTMLFormElement>){
-    event.preventDefault();const text=draft.trim().slice(0,4000);if(!text)return;
+    event.preventDefault();const text=safeUserText(draft,1000).trim();if(!text)return;
     const time=new Intl.DateTimeFormat("de-DE",{hour:"2-digit",minute:"2-digit"}).format(new Date());
     setChats(items=>items.map(c=>c.id===activeId?{...c,preview:text,time,messages:[...c.messages,{id:crypto.randomUUID(),author:"you",text,time}].slice(-100)}:c));
     setDraft("");setNotice("Demo-Nachricht lokal hinzugefügt – nicht versendet.");
@@ -71,13 +102,13 @@ export function AppShell() {
 
       {view==="chats"&&<div className="chat-layout">
         <section className="chat-list-panel"><div className="page-heading"><div><p className="eyebrow">DEIN WORKSPACE</p><h1>Nachrichten</h1><p>Deine Unterhaltungen an einem Ort.</p></div><button className="primary-button" onClick={()=>toast("Neue Unterhaltung: Backend und sichere Geräteidentität fehlen noch.")}>＋ Neuer Chat</button></div>
-          <label className="search-field"><span>⌕</span><input value={search} maxLength={80} onChange={e=>setSearch(e.target.value)} placeholder="Unterhaltungen suchen" aria-label="Unterhaltungen suchen"/></label>
+          <label className="search-field"><span>⌕</span><input value={search} onChange={e=>setSearch(safeUserText(e.target.value,80))} placeholder="Unterhaltungen suchen" aria-label="Unterhaltungen suchen"/></label>
           <div className="chat-list">{filtered.map(c=><button key={c.id} onClick={()=>setActiveId(c.id)} className={activeId===c.id?"chat-list-item active":"chat-list-item"}><span className="avatar">{c.initials}{c.online&&<i/>}</span><span className="chat-list-copy"><b>{c.name}</b><small>{c.preview}</small></span><span className="chat-list-meta"><time>{c.time}</time>{c.unread&&<i>{c.unread}</i>}</span></button>)}</div>
         </section>
         <section className="conversation-panel"><header className="conversation-header"><span className="avatar">{active.initials}{active.online&&<i/>}</span><div><b>{active.name}</b><small>{active.online?"Online · Demo-Status":"Unterhaltung"}</small></div><span className="conversation-type">{active.kind==="p2p"?"P2P":active.kind==="public"?"ÖFFENTLICH":active.kind==="private"?"PRIVAT":"DIREKT"}</span><button className="icon-action" onClick={()=>toast("Chat-Details sind Teil der nächsten UI-Ausbaustufe.")}>···</button></header>
           <div className="security-warning"><span>◇</span><div><b>E2EE ist noch nicht aktiv</b><small>Dies ist eine lokale UI-Demo. Keine echten oder vertraulichen Nachrichten eingeben.</small></div></div>
           <div className="message-feed"><div className="day-label"><span>HEUTE · DEMO</span></div>{active.messages.map(m=><div key={m.id} className={m.author==="you"?"message-line own":"message-line"}><div className="bubble"><p>{m.text}</p><time>{m.time}{m.author==="you"&&" · ✓"}</time></div></div>)}</div>
-          <form className="message-composer" onSubmit={send}><button type="button" onClick={()=>toast("Dateianhänge werden nach E2EE implementiert.")}>＋</button><input value={draft} maxLength={4000} onChange={e=>setDraft(e.target.value)} placeholder="Demo-Nachricht eingeben …" aria-label="Demo-Nachricht eingeben"/><span title="Noch nicht verschlüsselt">◇</span><button className="send-action" disabled={!draft.trim()} aria-label="Lokal hinzufügen">↑</button></form><small className="composer-caption">Nur lokale Demo · kein Netzwerkversand</small>
+          <form className="message-composer" onSubmit={send}><button type="button" onClick={()=>toast("Dateianhänge werden nach E2EE implementiert.")}>＋</button><input value={draft} onChange={e=>setDraft(safeUserText(e.target.value,1000))} placeholder="Demo-Nachricht eingeben …" aria-label="Demo-Nachricht eingeben"/><span title="Noch nicht verschlüsselt">◇</span><button className="send-action" disabled={!draft.trim()} aria-label="Lokal hinzufügen">↑</button></form><small className="composer-caption">Nur lokale Demo · kein Netzwerkversand</small>
         </section>
       </div>}
 
