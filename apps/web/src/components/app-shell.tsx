@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Icon, type IconName } from "./icon";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { UserAvatar } from "./user-avatar";
+import { QuantumLogo } from "./quantum-logo";
 
 type GraphemeSegmenter = {
   segment(input: string): Iterable<{ segment: string }>;
@@ -88,7 +89,7 @@ export function AppShell() {
 
   return <main className="quantum-app" data-theme={theme}>
     <aside className={`left-rail ${mobileMenu?"mobile-open":""}`}>
-      <button className="brand" onClick={()=>setView("chats")}><span className="brand-symbol">Q</span><span>quantum</span><em>PREVIEW</em></button>
+      <button className="brand" onClick={()=>setView("chats")} aria-label="Quantum – zur Nachrichtenübersicht"><QuantumLogo /><em>PREVIEW</em></button>
       <button className="mini-profile" onClick={()=>setView("profile")}><UserAvatar name="Dein Quantum" className="self" /><span><b>Dein Quantum</b><small>Lokales Demo-Profil</small></span><i className="profile-chevron"><Icon name="chevron-down" size={14}/></i></button>
       <div className="nav-caption">WORKSPACE</div>
       <nav className="primary-nav">{navItems.map(item=><button key={item.id} className={view===item.id?"nav-active":""} onClick={()=>{setView(item.id);setMobileMenu(false)}}><span className="nav-icon"><Icon name={item.icon} size={17}/></span>{item.label}{item.id==="friends"&&requests.length>0&&<b className="nav-count">{requests.length}</b>}</button>)}</nav>
