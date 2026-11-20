@@ -25,8 +25,7 @@ type View = typeof navItems[number]["id"] | "support";
 export function AppShell() {
   const [view,setView]=useState<View>("chats");
   const [theme,setTheme]=useState<"dark"|"light">("dark");
-  useEffect(()=>{const saved=window.localStorage.getItem("quantum-theme");if(saved==="light"||saved==="dark")setTheme(saved)},[]);
-  useEffect(()=>{document.documentElement.dataset.theme=theme;window.localStorage.setItem("quantum-theme",theme)},[theme]);
+  useEffect(()=>{const saved=window.localStorage.getItem("quantum-theme");const initial=saved==="light"||saved==="dark"?saved:"dark";setTheme(initial);document.documentElement.dataset.theme=initial},[]);
   const [chats,setChats]=useState(seedChats);
   const [activeId,setActiveId]=useState("lea");
   const [draft,setDraft]=useState("");
@@ -67,7 +66,7 @@ export function AppShell() {
     </aside>
 
     <section className="main-area">
-      <header className="topbar"><button className="mobile-toggle" onClick={()=>setMobileMenu(v=>!v)}>☰</button><div className="breadcrumb">Quantum <span>/</span> {title}</div><div className="top-actions"><span className="local-pill"><i/> Lokale Vorschau</span><button className="theme-switch" type="button" onClick={()=>setTheme(v=>v==="dark"?"light":"dark")} aria-label={theme==="dark"?"Zum hellen Design wechseln":"Zum dunklen Design wechseln"}>{theme==="dark"?"☼":"◐"}<span>{theme==="dark"?"Light":"Dark"}</span></button><button className="top-avatar" onClick={()=>setView("profile")} aria-label="Profil öffnen">Q</button></div></header>
+      <header className="topbar"><button className="mobile-toggle" onClick={()=>setMobileMenu(v=>!v)}>☰</button><div className="breadcrumb">Quantum <span>/</span> {title}</div><div className="top-actions"><span className="local-pill"><i/> Lokale Vorschau</span><button className="theme-switch" type="button" onClick={()=>setTheme(v=>{const next=v==="dark"?"light":"dark";window.localStorage.setItem("quantum-theme",next);document.documentElement.dataset.theme=next;return next})} aria-label={theme==="dark"?"Zum hellen Design wechseln":"Zum dunklen Design wechseln"}>{theme==="dark"?"☼":"◐"}<span>{theme==="dark"?"Light":"Dark"}</span></button><button className="top-avatar" onClick={()=>setView("profile")} aria-label="Profil öffnen">Q</button></div></header>
       <div className="toast-line" role="status">{notice}</div>
 
       {view==="chats"&&<div className="chat-layout">
