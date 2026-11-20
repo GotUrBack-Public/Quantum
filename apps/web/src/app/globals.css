@@ -615,3 +615,22 @@ body{letter-spacing:-.012em}
 /* Interaction safety: no decorative layer may intercept controls. */
 .quantum-app button,.quantum-app input,.quantum-app textarea,.quantum-app select,.quantum-app a{pointer-events:auto;}
 .quantum-app .view-transition{pointer-events:auto;}
+
+
+/* HARD PERFORMANCE MODE: remove all non-essential visual work. */
+*,*::before,*::after{
+  animation:none!important;
+  transition:none!important;
+  scroll-behavior:auto!important;
+  transform:none!important;
+  filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+  will-change:auto!important;
+}
+.quantum-app,.left-rail,.topbar,.chat-list-panel,.room-card,.surface-card,
+.info-panel,.message-composer,.bubble,.ad-slot{
+  background-image:none!important;
+}
