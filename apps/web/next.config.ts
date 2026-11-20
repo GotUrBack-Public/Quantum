@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isGitHubPages = process.env.GITHUB_PAGES === "true";
+
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
@@ -10,9 +12,19 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
-  },
+  ...(isGitHubPages
+    ? {
+        output: "export" as const,
+        basePath: "/Quantum",
+        assetPrefix: "/Quantum/",
+        trailingSlash: true,
+        images: { unoptimized: true },
+      }
+    : {
+        async headers() {
+          return [{ source: "/(.*)", headers: securityHeaders }];
+        },
+      }),
 };
 
 export default nextConfig;
