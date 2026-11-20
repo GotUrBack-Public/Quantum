@@ -166,3 +166,13 @@ button:focus-visible,input:focus-visible{outline:1px solid var(--accent);outline
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+
+/* Shared inline icon system */
+.quantum-icon{display:block;flex:none;vertical-align:middle}
+.nav-icon{display:inline-flex;align-items:center;justify-content:center;width:19px;flex:none}
+.primary-button,.secondary-button,.profile-badge,.badge-list span{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.field-icon{display:inline-flex;align-items:center;justify-content:center;flex:none}
+.message-composer>button:first-child{display:inline-flex;align-items:center;justify-content:center;padding:2px}
+.send-action{display:inline-flex;align-items:center;justify-content:center}
+.icon-action{display:inline-flex;align-items:center;justify-content:center;padding:5px}
