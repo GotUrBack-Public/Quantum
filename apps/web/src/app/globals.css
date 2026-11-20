@@ -287,3 +287,9 @@ button:focus-visible,input:focus-visible{outline:1px solid var(--accent);outline
  .profile-avatar{width:68px;height:68px}
 }
 @media(prefers-reduced-motion:reduce){.message-line,.message-line.own .bubble{animation:none!important}}
+
+
+.conversation-actions{display:flex;align-items:center;gap:5px;margin-left:12px}
+.conversation-actions .icon-action{width:34px;height:34px;color:var(--muted)}
+.conversation-actions .icon-action:hover{color:var(--accent);border-color:var(--line)}
+@media(max-width:420px){.conversation-actions{gap:1px;margin-left:4px}.conversation-actions .icon-action{width:30px;height:30px}.conversation-type{display:none}}
