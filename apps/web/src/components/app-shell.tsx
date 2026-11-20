@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type Message = { id: string; author: "you" | "them"; text: string; time: string };
 type Chat = { id: string; name: string; initials: string; preview: string; time: string; kind: "direct" | "public" | "private" | "p2p"; online?: boolean; unread?: number; messages: Message[] };
@@ -24,6 +24,9 @@ type View = typeof navItems[number]["id"] | "support";
 
 export function AppShell() {
   const [view,setView]=useState<View>("chats");
+  const [theme,setTheme]=useState<"dark"|"light">("dark");
+  useEffect(()=>{const saved=window.localStorage.getItem("quantum-theme");if(saved==="light"||saved==="dark")setTheme(saved)},[]);
+  useEffect(()=>{document.documentElement.dataset.theme=theme;window.localStorage.setItem("quantum-theme",theme)},[theme]);
   const [chats,setChats]=useState(seedChats);
   const [activeId,setActiveId]=useState("lea");
   const [draft,setDraft]=useState("");
@@ -40,7 +43,7 @@ export function AppShell() {
   const filtered=useMemo(()=>chats.filter(c=>c.name.toLowerCase().includes(search.toLowerCase())),[chats,search]);
 
   function send(event:FormEvent<HTMLFormElement>){
-    event.preventDefault();const text=draft.trim();if(!text)return;
+    event.preventDefault();const text=draft.trim().slice(0,4000);if(!text)return;
     const time=new Intl.DateTimeFormat("de-DE",{hour:"2-digit",minute:"2-digit"}).format(new Date());
     setChats(items=>items.map(c=>c.id===activeId?{...c,preview:text,time,messages:[...c.messages,{id:crypto.randomUUID(),author:"you",text,time}]}:c));
     setDraft("");setNotice("Demo-Nachricht lokal hinzugefügt – nicht versendet.");
@@ -49,7 +52,7 @@ export function AppShell() {
   function toast(text:string){setNotice(text)}
   const title=navItems.find(n=>n.id===view)?.label??"Support";
 
-  return <main className="quantum-app">
+  return <main className="quantum-app" data-theme={theme}>
     <aside className={`left-rail ${mobileMenu?"mobile-open":""}`}>
       <button className="brand" onClick={()=>setView("chats")}><span className="brand-symbol">Q</span><span>quantum</span><em>PREVIEW</em></button>
       <button className="mini-profile" onClick={()=>setView("profile")}><span className="avatar self">Q</span><span><b>Dein Quantum</b><small>Lokales Demo-Profil</small></span><i>⌄</i></button>
@@ -64,18 +67,18 @@ export function AppShell() {
     </aside>
 
     <section className="main-area">
-      <header className="topbar"><button className="mobile-toggle" onClick={()=>setMobileMenu(v=>!v)}>☰</button><div className="breadcrumb">Quantum <span>/</span> {title}</div><div className="top-actions"><span className="local-pill"><i/> Lokale Vorschau</span><button className="top-avatar" onClick={()=>setView("profile")}>Q</button></div></header>
+      <header className="topbar"><button className="mobile-toggle" onClick={()=>setMobileMenu(v=>!v)}>☰</button><div className="breadcrumb">Quantum <span>/</span> {title}</div><div className="top-actions"><span className="local-pill"><i/> Lokale Vorschau</span><button className="theme-switch" type="button" onClick={()=>setTheme(v=>v==="dark"?"light":"dark")} aria-label={theme==="dark"?"Zum hellen Design wechseln":"Zum dunklen Design wechseln"}>{theme==="dark"?"☼":"◐"}<span>{theme==="dark"?"Light":"Dark"}</span></button><button className="top-avatar" onClick={()=>setView("profile")} aria-label="Profil öffnen">Q</button></div></header>
       <div className="toast-line" role="status">{notice}</div>
 
       {view==="chats"&&<div className="chat-layout">
         <section className="chat-list-panel"><div className="page-heading"><div><p className="eyebrow">DEIN WORKSPACE</p><h1>Nachrichten</h1><p>Deine Unterhaltungen an einem Ort.</p></div><button className="primary-button" onClick={()=>toast("Neue Unterhaltung: Backend und sichere Geräteidentität fehlen noch.")}>＋ Neuer Chat</button></div>
-          <label className="search-field"><span>⌕</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Unterhaltungen suchen"/></label>
+          <label className="search-field"><span>⌕</span><input value={search} maxLength={80} onChange={e=>setSearch(e.target.value)} placeholder="Unterhaltungen suchen" aria-label="Unterhaltungen suchen"/></label>
           <div className="chat-list">{filtered.map(c=><button key={c.id} onClick={()=>setActiveId(c.id)} className={activeId===c.id?"chat-list-item active":"chat-list-item"}><span className="avatar">{c.initials}{c.online&&<i/>}</span><span className="chat-list-copy"><b>{c.name}</b><small>{c.preview}</small></span><span className="chat-list-meta"><time>{c.time}</time>{c.unread&&<i>{c.unread}</i>}</span></button>)}</div>
         </section>
         <section className="conversation-panel"><header className="conversation-header"><span className="avatar">{active.initials}{active.online&&<i/>}</span><div><b>{active.name}</b><small>{active.online?"Online · Demo-Status":"Unterhaltung"}</small></div><span className="conversation-type">{active.kind==="p2p"?"P2P":active.kind==="public"?"ÖFFENTLICH":active.kind==="private"?"PRIVAT":"DIREKT"}</span><button className="icon-action" onClick={()=>toast("Chat-Details sind Teil der nächsten UI-Ausbaustufe.")}>···</button></header>
           <div className="security-warning"><span>◇</span><div><b>E2EE ist noch nicht aktiv</b><small>Dies ist eine lokale UI-Demo. Keine echten oder vertraulichen Nachrichten eingeben.</small></div></div>
           <div className="message-feed"><div className="day-label"><span>HEUTE · DEMO</span></div>{active.messages.map(m=><div key={m.id} className={m.author==="you"?"message-line own":"message-line"}><div className="bubble"><p>{m.text}</p><time>{m.time}{m.author==="you"&&" · ✓"}</time></div></div>)}</div>
-          <form className="message-composer" onSubmit={send}><button type="button" onClick={()=>toast("Dateianhänge werden nach E2EE implementiert.")}>＋</button><input value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Demo-Nachricht eingeben …"/><span title="Noch nicht verschlüsselt">◇</span><button className="send-action" disabled={!draft.trim()} aria-label="Lokal hinzufügen">↑</button></form><small className="composer-caption">Nur lokale Demo · kein Netzwerkversand</small>
+          <form className="message-composer" onSubmit={send}><button type="button" onClick={()=>toast("Dateianhänge werden nach E2EE implementiert.")}>＋</button><input value={draft} maxLength={4000} onChange={e=>setDraft(e.target.value)} placeholder="Demo-Nachricht eingeben …" aria-label="Demo-Nachricht eingeben"/><span title="Noch nicht verschlüsselt">◇</span><button className="send-action" disabled={!draft.trim()} aria-label="Lokal hinzufügen">↑</button></form><small className="composer-caption">Nur lokale Demo · kein Netzwerkversand</small>
         </section>
       </div>}
 
