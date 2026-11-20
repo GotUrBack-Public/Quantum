@@ -568,3 +568,13 @@ body{letter-spacing:-.012em}
 @media(prefers-reduced-motion:reduce){
  .page-heading h1,.security-warning,.message-composer{animation:none!important}
 }
+
+
+/* Quantum identity: a restrained, high-contrast monogram and wordmark. */
+.brand{gap:12px;padding:0 8px 28px}
+.quantum-brand-lockup{display:inline-flex;align-items:center;gap:10px;min-width:0;color:var(--text)}
+.quantum-brand-mark{display:block;width:36px;height:36px;flex:none}
+.quantum-brand-word{font-size:16px;font-weight:760;letter-spacing:2.6px;line-height:1;color:var(--text)}
+:root[data-theme=light] .quantum-brand-lockup{color:#111}
+.brand em{margin-left:auto}
+@media(max-width:720px){.quantum-brand-mark{width:34px;height:34px}.quantum-brand-word{font-size:15px}}
