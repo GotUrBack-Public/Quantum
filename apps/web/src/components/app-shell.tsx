@@ -5,6 +5,7 @@ import { Icon, type IconName } from "./icon";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { UserAvatar } from "./user-avatar";
 import { QuantumLogo } from "./quantum-logo";
+import { UploadTray } from "./upload-tray";
 
 type GraphemeSegmenter = {
   segment(input: string): Iterable<{ segment: string }>;
@@ -65,6 +66,8 @@ export function AppShell() {
   const [chats,setChats]=useState(seedChats);
   const [activeId,setActiveId]=useState("lea");
   const [draft,setDraft]=useState("");
+  const [attachments,setAttachments]=useState<File[]>([]);
+  const [showUploads,setShowUploads]=useState(false);
   const [search,setSearch]=useState("");
   const [mobileMenu,setMobileMenu]=useState(false);
   const [guardian,setGuardian]=useState(true);
@@ -81,7 +84,7 @@ export function AppShell() {
     event.preventDefault();const text=safeUserText(draft,1000).trim();if(!text)return;
     const time=new Intl.DateTimeFormat("de-DE",{hour:"2-digit",minute:"2-digit"}).format(new Date());
     setChats(items=>items.map(c=>c.id===activeId?{...c,preview:text,time,messages:[...c.messages,{id:crypto.randomUUID(),author:"you" as const,text,time}].slice(-100)}:c));
-    setDraft("");setNotice("Demo-Nachricht lokal hinzugefügt – nicht versendet.");
+    setDraft("");setAttachments([]);setShowUploads(false);setNotice("Demo-Nachricht lokal hinzugefügt – nicht versendet.");
   }
   function openChat(id:string){setActiveId(id);setView("chats");setMobileMenu(false)}
   function toast(text:string){setNotice(text)}
@@ -115,7 +118,7 @@ export function AppShell() {
         <section className="conversation-panel"><header className="conversation-header"><UserAvatar name={active.name} src={active.avatarUrl} online={active.online} /><div><b>{active.name}</b><small>{active.online?"Online · Demo-Status":"Unterhaltung"}</small></div><span className="conversation-type">{active.kind==="p2p"?"P2P":active.kind==="public"?"ÖFFENTLICH":active.kind==="private"?"PRIVAT":"DIREKT"}</span><div className="conversation-actions"><button className="icon-action" aria-label="Videoanruf" title="Videoanruf" onClick={()=>toast("Videoanrufe werden nach der Medien- und E2EE-Implementierung aktiviert.")}><Icon name="video" size={18}/></button><button className="icon-action" aria-label="Sprachanruf" title="Sprachanruf" onClick={()=>toast("Sprachanrufe werden nach der Medien- und E2EE-Implementierung aktiviert.")}><Icon name="phone" size={17}/></button><button className="icon-action" aria-label="Chat-Details" title="Chat-Details" onClick={()=>toast("Chat-Details sind Teil der nächsten UI-Ausbaustufe.")}><Icon name="dots" size={19}/></button></div></header>
           <div className="security-warning"><span><Icon name="shield-lock" size={18}/></span><div><b>E2EE ist noch nicht aktiv</b><small>Dies ist eine lokale UI-Demo. Keine echten oder vertraulichen Nachrichten eingeben.</small></div></div>
           <div className="message-feed"><div className="day-label"><span>HEUTE · DEMO</span></div><AnimatePresence initial={false}>{active.messages.map((m,index)=><motion.div key={m.id} layout initial={prefersReducedMotion?false:{opacity:0,y:12,scale:0.985}} animate={{opacity:1,y:0,scale:1}} transition={{type:"spring",stiffness:420,damping:32,delay:prefersReducedMotion?0:Math.min(index*0.018,0.1)}} className={m.author==="you"?"message-line own":"message-line"}><div className="bubble"><p>{m.text}</p><time>{m.time}{m.author==="you"&&" · ✓"}</time></div></motion.div>)}</AnimatePresence></div>
-          <form className="message-composer" onSubmit={send}><button type="button" aria-label="Datei anhängen" onClick={()=>toast("Dateianhänge werden nach E2EE implementiert.")}><Icon name="paperclip" size={17}/></button><input value={draft} onChange={e=>setDraft(safeUserText(e.target.value,1000))} placeholder="Demo-Nachricht eingeben …" aria-label="Demo-Nachricht eingeben"/><span title="Noch nicht verschlüsselt"><Icon name="lock" size={15}/></span><motion.button className="send-action" disabled={!draft.trim()} aria-label="Lokal hinzufügen" whileHover={prefersReducedMotion?undefined:{scale:1.06}} whileTap={prefersReducedMotion?undefined:{scale:0.9,rotate:-7}} transition={{type:"spring",stiffness:520,damping:24}}><Icon name="arrow-up" size={18}/></motion.button></form><small className="composer-caption">Nur lokale Demo · kein Netzwerkversand</small>
+          <form className="message-composer" onSubmit={send}><button type="button" aria-label="Dateien anhängen" aria-expanded={showUploads} onClick={()=>setShowUploads(v=>!v)}><Icon name="paperclip" size={17}/></button><input value={draft} onChange={e=>setDraft(safeUserText(e.target.value,1000))} placeholder="Demo-Nachricht eingeben …" aria-label="Demo-Nachricht eingeben"/><span title="Noch nicht verschlüsselt"><Icon name="lock" size={15}/></span><motion.button className="send-action" disabled={!draft.trim()} aria-label="Lokal hinzufügen" whileHover={prefersReducedMotion?undefined:{scale:1.06}} whileTap={prefersReducedMotion?undefined:{scale:0.9,rotate:-7}} transition={{type:"spring",stiffness:520,damping:24}}><Icon name="arrow-up" size={18}/></motion.button></form>{showUploads&&<UploadTray files={attachments} onAdd={(incoming)=>{setAttachments(all=>[...all,...incoming].slice(0,8));toast("Dateien lokal ausgewählt. Es findet noch kein Upload statt.");}} onRemove={(file)=>setAttachments(all=>all.filter(item=>item!==file))} maxSize={25*1024*1024}/>}<small className="composer-caption">Nur lokale Demo · kein Netzwerkversand</small>
         </section>
       </div>}
 
