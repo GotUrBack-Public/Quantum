@@ -38,7 +38,7 @@ export function UploadTray({ files, onAdd, onRemove, maxSize = 25 * 1024 * 1024 
         onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={(event) => { event.preventDefault(); setDragging(false); addFiles(event.dataTransfer.files); }}>
-        <span className="upload-drop-icon"><Icon name="cloud-upload" size={19}/></span>
+        <span className="upload-drop-icon"><Icon name="paperclip" size={19}/></span>
         <div className="upload-drop-copy"><b>Dateien hier ablegen</b><small>oder vom Gerät auswählen · maximal {formatSize(maxSize)} pro Datei</small></div>
         <button type="button" className="upload-browse" onClick={() => inputRef.current?.click()}>Durchsuchen</button>
         <input ref={inputRef} type="file" multiple hidden onChange={(event) => { if (event.target.files) addFiles(event.target.files); event.currentTarget.value = ""; }}/>
@@ -46,7 +46,7 @@ export function UploadTray({ files, onAdd, onRemove, maxSize = 25 * 1024 * 1024 
       {error && <p className="upload-error" role="alert">{error}</p>}
       {files.length > 0 && <div className="upload-file-list">{files.map((file, index) => (
         <div className="upload-file" key={file.name + file.size + index}>
-          <span className="upload-file-icon"><Icon name={file.type.startsWith("image/") ? "photo" : "file" } size={17}/></span>
+          <span className="upload-file-icon"><Icon name={file.type.startsWith("image/") ? "photo" : "paperclip" } size={17}/></span>
           <span className="upload-file-copy"><b>{file.name}</b><small>{formatSize(file.size)} · lokal ausgewählt</small></span>
           <button type="button" aria-label={file.name + " entfernen"} onClick={() => onRemove(file)}><Icon name="x" size={15}/></button>
         </div>
