@@ -44,7 +44,7 @@ export function AppShell() {
   function send(event:FormEvent<HTMLFormElement>){
     event.preventDefault();const text=draft.trim().slice(0,4000);if(!text)return;
     const time=new Intl.DateTimeFormat("de-DE",{hour:"2-digit",minute:"2-digit"}).format(new Date());
-    setChats(items=>items.map(c=>c.id===activeId?{...c,preview:text,time,messages:[...c.messages,{id:crypto.randomUUID(),author:"you",text,time}]}:c));
+    setChats(items=>items.map(c=>c.id===activeId?{...c,preview:text,time,messages:[...c.messages,{id:crypto.randomUUID(),author:"you",text,time}].slice(-100)}:c));
     setDraft("");setNotice("Demo-Nachricht lokal hinzugefügt – nicht versendet.");
   }
   function openChat(id:string){setActiveId(id);setView("chats");setMobileMenu(false)}
