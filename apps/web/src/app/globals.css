@@ -598,3 +598,12 @@ body{letter-spacing:-.012em}
 .upload-error{margin:8px 2px 0;color:var(--text);font-size:10px}
 @media(max-width:520px){.upload-dropzone{flex-wrap:wrap}.upload-drop-copy{min-width:calc(100% - 52px)}.upload-browse{margin-left:48px}}
 @media(prefers-reduced-motion:reduce){.upload-tray{animation:none}}
+
+/* Minimal reserved advertising placement with optional future image/video media. */
+.ad-slot{position:relative;display:flex;align-items:center;justify-content:center;gap:12px;min-height:66px;margin:0 0 24px;padding:13px 18px;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--muted);text-align:center}
+.ad-slot-kicker,.ad-slot-format{font-size:8px;font-weight:700;letter-spacing:1.15px;white-space:nowrap}
+.ad-slot-copy{color:var(--text);font-size:12px;font-weight:550;letter-spacing:-.1px}
+.ad-slot-format{padding-left:12px;border-left:1px solid var(--line);opacity:.7}
+.language-switch{display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:34px;padding:0 9px;border:1px solid var(--line);border-radius:7px;background:var(--panel-2);color:var(--text);font-size:10px;font-weight:750;letter-spacing:.5px}
+.language-switch:hover{background:var(--panel-3)}
+@media(max-width:650px){.ad-slot{min-height:58px;gap:8px;padding:10px}.ad-slot-kicker,.ad-slot-format{font-size:7px}.ad-slot-copy{font-size:11px}}
