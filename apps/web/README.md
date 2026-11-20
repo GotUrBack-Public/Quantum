@@ -1,21 +1,30 @@
 # Quantum Web
 
-First web client for Quantum, built with Next.js, React and strict TypeScript.
+Next.js + React + TypeScript frontend prototype.
 
-## Current state
+## Run
 
-The initial chat screen is a **local UI prototype only**. Conversation fixtures are hard-coded and sending a message updates React state in the current browser tab. No message is sent to a server, no account authentication exists, and no encryption is implemented yet.
+From the repository root:
 
-## Security boundary
+```bash
+pnpm install
+pnpm --filter @quantum/web dev
+```
 
-- The interface explicitly labels the current preview as unencrypted.
-- Do not connect this prototype to real user conversations.
-- No third-party fonts, analytics, remote avatars, or advertising SDKs are included.
-- Do not put message content, credentials, tokens, or cryptographic material in URLs or telemetry.
-- Production messaging must encrypt on the sender device before network transmission and decrypt only on authorized recipient devices.
-- The server must enforce authentication, conversation membership, device authorization, replay protection, payload limits, and rate limits. Client-side checks are never authorization.
-- Adopt a reviewed E2EE protocol implementation; do not implement a custom cipher or key exchange.
+## Included screens
 
-## Development
+Messages, Discover, Contacts, Profile, Settings (including Quantum Guardian preference mockups), and a visual-only Support console.
 
-Install dependencies from the repository root with pnpm, then run the web app using the workspace script. A lockfile and CI checks still need to be added.
+## Current state and limitations
+
+All content is fictional fixture data. Interactions update local React state in the current browser tab only. There is no API, backend, authentication, WebSocket, database, network message delivery, persistent storage, or E2EE implementation.
+
+The chat screen displays an explicit warning that encryption is not active. Do not enter real or confidential messages.
+
+## Privacy and security constraints
+
+- No third-party fonts, analytics, remote avatars, tracking pixels or advertising SDKs.
+- No secrets, credentials or private keys in URLs, logs or telemetry.
+- UI checks are never authorization. Future backend operations must validate permissions server-side.
+- Production messaging must use a reviewed E2EE protocol; do not implement custom ciphers or key exchange.
+- Keep UI components independent of transport and persistence so backend integration can be added later without embedding security decisions in presentation code.
